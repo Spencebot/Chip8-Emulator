@@ -1,3 +1,5 @@
 # Chip8-Emulator
-SM: 13072018 Initial Release
-Starting to learn CHIP8 operations
+started disassembler
+
+file load ends prematurely on by 0x1A.  Is this EoF?
+are opCodes required to be on even memory locations?  some ROMs don't seem to be.
