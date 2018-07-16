@@ -1,0 +1,4 @@
+﻿  CHIP8.cpp
+c:\users\spenc\documents\sourcecode\chip8\chip8\chip8.cpp(59): warning C4018: '<': signed/unsigned mismatch
+c:\users\spenc\documents\sourcecode\chip8\chip8\chip8.cpp(54): warning C4101: 'memoryLocation': unreferenced local variable
+  CHIP8.vcxproj -> C:\Users\spenc\Documents\SourceCode\CHIP8\Debug\CHIP8.exe
