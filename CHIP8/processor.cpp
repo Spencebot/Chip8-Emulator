@@ -6,7 +6,7 @@
 #include <array>
 using namespace std;
 
-processor::processor(vector<uint16_t> romFile) {
+processor::processor(vector<uint8_t> romFile) {
 	programToRun = romFile;
 }
 
@@ -149,24 +149,22 @@ void processor::run()
 			R[(opCode & 0x0F00) >> 8] = ((rand() & 0xFF) & (opCode & 0x00FF));
 			break;
 		case 0xD: // Draw n bytes at positon Rx, Ry - Dxyn
-			for (int n; n <= (opCode & 0x000F); n++) {
+			for (int n = 0; n < (opCode & 0x000F); n++) {
+				uint64_t tempSpriteRow;
 				R[0xF] = 0;
-				/* THIS FUNCTION NEEDS TO BE FIXED TO DISPLAY ON NON-BYTE BOUNDARIES
-				// if it is a predefined sprite
-				if (I < 0) {
-					// each row is 8 bytes wide
-					if (display[(opCode & 0x0F00)>>8 + ((opCode & 0x00F0)>>4)*8 + n*8] 
-						& sprites[(-1 * I - 1) * 5 + n] != 0 ) R[0xF] = 1;
-					display[(opCode & 0x0F00) >> 8 + ((opCode & 0x00F0) >> 4) * 8 + n * 8] ^= sprites[(-1 * I - 1) * 5 + n];
+				if (I < 0) { // if it is a predefined sprite
+					tempSpriteRow = sprites[(-1 * I - 1) * 5 + n];
 				}
-				// load memory to display
-				else {
-					if (display[(opCode & 0x0F00) >> 8 + ((opCode & 0x00F0) >> 4) * 64 + n * 64]
-						& programToRun[I + n] != 0) R[0xF] = 1;
-					display[(opCode & 0x0F00) >> 8 + ((opCode & 0x00F0) >> 4) * 64 + n * 64] ^= programToRun[I + n];
+				else { // load memory to display
+					tempSpriteRow = programToRun[(I-0x200) + n];
 				}
+				// shift the row to column 0 and then down to location x
+				tempSpriteRow = tempSpriteRow << (64 - 8) >> ((opCode & 0x0F00) >> 8);
+				// Set RF if collision on this row
+				if ((display[((opCode & 0x00F0) >> 4) + n] & tempSpriteRow) != 0) R[0xF] = 1;
+				// display(row) XOR sprite
+				display[((opCode & 0x00F0) >> 4) + n] ^= tempSpriteRow;
 			}
-				FIX THIS FUNCTION */
 			break;
 		case 0xE:
 			switch (opCode & 0x00FF) {
@@ -204,20 +202,20 @@ void processor::run()
 				break;
 			case 0x33: // Set binary coded decimal value of Rx to memory locations of I, I+1, and I+2
 				if (I > 0x200) {
-					programToRun[I + 2] = R[(opCode & 0x0F00) >> 8] % 10;
-					programToRun[I + 1] = ((R[(opCode & 0x0F00) >> 8] - programToRun[I + 2]) % 100) / 10;
-					programToRun[I] = (R[(opCode & 0x0F00) >> 8] - 10 * programToRun[I + 1] - programToRun[I + 2]) / 100;
+					programToRun[(I-0x200) + 2] = R[(opCode & 0x0F00) >> 8] % 10;
+					programToRun[(I - 0x200) + 1] = ((R[(opCode & 0x0F00) >> 8] - programToRun[(I - 0x200) + 2]) % 100) / 10;
+					programToRun[(I - 0x200)] = (R[(opCode & 0x0F00) >> 8] - 10 * programToRun[(I - 0x200) + 1] - programToRun[(I - 0x200) + 2]) / 100;
 				}
 				// else { do I need to implement a user being able to overwrite default sprites?}
 				break;
 			case 0x55: // Set memory, starting at location of I, to R0-Rx
 				for (int n = 0; n <= (opCode & 0x0F00) >> 8; n++) {
-					programToRun[I + n] = R[(opCode & 0x0F00) >> 8];
+					programToRun[(I - 0x200) + n] = R[(opCode & 0x0F00) >> 8];
 				}
 				break;
 			case 0x65: //Set R0-Rx to values starting at memory location of I
 				for (int n = 0; n <= (opCode & 0x0F00) >> 8; n++) {
-					R[(opCode & 0x0F00) >> 8] = programToRun[I + n];
+					R[(opCode & 0x0F00) >> 8] = programToRun[(I - 0x200) + n];
 				}
 				break;
 			default: // invalid command
@@ -227,12 +225,13 @@ void processor::run()
 			}
 			break;
 		}
-	}
-	if (exception) cout << errorText;
-	else {
-		pc += 2;
-		if (DT > 0) DT--;
-		if (DT > 0) DT--;
+
+		if (exception) cout << errorText;
+		else {
+			pc += 2;
+			if (DT > 0) DT--;
+			if (DT > 0) DT--;
+		}
 	}
 }
 

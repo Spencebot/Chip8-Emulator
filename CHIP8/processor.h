@@ -7,11 +7,11 @@ using namespace std;
 class processor
 {
 private:
-	vector<uint16_t> programToRun;
+	vector<uint8_t> programToRun;
 	uint16_t pc = 0x200;
 	array<uint16_t, 16> stack;
 	int sp = -1;
-	array<bool, 64 * 32> display;
+	array<uint64_t, 32> display;
 	int I = 0;
 	array<uint8_t, 16> R;
 	uint8_t DT = 0;
@@ -54,7 +54,7 @@ private:
 	};
 
 public:
-	processor(vector<uint16_t> romFile);
+	processor(vector<uint8_t> romFile);
 
 	void run();
 
