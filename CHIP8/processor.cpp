@@ -15,6 +15,8 @@ processor::processor(vector<uint8_t> romFile) {
 void processor::executeOperation()
 {
 	uint16_t opCode = programToRun[pc - 0x200] * 256 + programToRun[pc - 0x1FF];
+	char userInputCheck;
+	char userChar = 'Z';
 	int result;
 	switch ((opCode & 0xF000) >> 12) {
 	case 0x0:
@@ -170,10 +172,16 @@ void processor::executeOperation()
 	case 0xE:
 		switch (opCode & 0x00FF) {
 		case 0x9E: // Skip next if key = Rx is pressed - Ex9E
-
+			userInputCheck = convertNumberToLetter(R[(opCode & 0x0F00) >> 8]);
+			if (GetKeyState(userInputCheck) & 0x8000) {
+				pc += 2;
+			}
 			break;
 		case 0xA1: // Skip next if key = Rx is not pressed - ExA1
-
+			userInputCheck = convertNumberToLetter(R[(opCode & 0x0F00) >> 8]);
+			if (!(GetKeyState(userInputCheck) & 0x8000)) {
+				pc += 2;
+			}
 			break;
 		default: // invalid command
 			exception = true;
@@ -186,8 +194,12 @@ void processor::executeOperation()
 		case 0x07: // Set Rx = Delay Timer
 			R[(opCode & 0x0F00) >> 8] = DT;
 			break;
-		case 0x0A: // Set Rx = next key value
-
+		case 0x0A: // Set Rx = next kchar userChar = 'Z';
+			while (convertLetterToNumber(userChar) > 0xF) {
+				cout << "Input a Value (0x0-0xF) :";
+				userChar = getchar();
+			}
+			R[(opCode & 0x0F00) >> 8] = convertLetterToNumber(userChar);
 			break;
 		case 0x15: // Set Delay Timer = Rx
 			DT = R[(opCode & 0x0F00) >> 8];
@@ -241,4 +253,57 @@ void processor::executeOperation()
 
 processor::~processor()
 {
+}
+
+char processor::convertNumberToLetter(uint8_t value) {
+	char letter;
+	switch (value) {
+	case 0x0: letter = '0';
+	case 0x1: letter = '1';
+	case 0x2: letter = '2';
+	case 0x3: letter = '3';
+	case 0x4: letter = '4';
+	case 0x5: letter = '5';
+	case 0x6: letter = '6';
+	case 0x7: letter = '7';
+	case 0x8: letter = '8';
+	case 0x9: letter = '9';
+	case 0xA: letter = 'A';
+	case 0xB: letter = 'B';
+	case 0xC: letter = 'C';
+	case 0xD: letter = 'D';
+	case 0xE: letter = 'E';
+	case 0xF: letter = 'F';	
+	}
+	return letter;
+}
+
+uint8_t processor::convertLetterToNumber(char letter) {
+	uint8_t value;
+	switch (letter) {
+	case '0': value = 0x0;
+	case '1': value = 0x1;
+	case '2': value = 0x2;
+	case '3': value = 0x3;
+	case '4': value = 0x4;
+	case '5': value = 0x5;
+	case '6': value = 0x6;
+	case '7': value = 0x7;
+	case '8': value = 0x8;
+	case '9': value = 0x9;
+	case 'A': value = 0xA;
+	case 'B': value = 0xB;
+	case 'C': value = 0xC;
+	case 'D': value = 0xD;
+	case 'E': value = 0xE;
+	case 'F': value = 0xF;
+	case 'a': value = 0xA;
+	case 'b': value = 0xB;
+	case 'c': value = 0xC;
+	case 'd': value = 0xD;
+	case 'e': value = 0xE;
+	case 'f': value = 0xF;
+	default: value = 0xFF;
+	}
+	return value;
 }

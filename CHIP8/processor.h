@@ -8,6 +8,13 @@ class processor
 {
 private:
 	vector<uint8_t> programToRun;
+	uint16_t pc = 0x200;
+	array<uint16_t, 16> stack;
+	int sp = -1;
+	int I = 0;
+	array<uint8_t, 16> R;
+	uint8_t DT = 0;
+	uint8_t ST = 0;
 	string errorText;
 	array<uint8_t, 5 * 16> sprites = {
 		// 0
@@ -44,6 +51,9 @@ private:
 		0xF0, 0x80, 0xF0, 0x80, 0x80	
 	};
 
+	char convertNumberToLetter(uint8_t value);
+	uint8_t convertLetterToNumber(char letter);
+
 public:
 	processor(vector<uint8_t> romFile);
 
@@ -51,14 +61,11 @@ public:
 
 	~processor();
 
-	uint16_t pc = 0x200;
-	array<uint16_t, 16> stack;
-	int sp = -1;
 	array<uint64_t, 32> display;
-	int I = 0;
-	array<uint8_t, 16> R;
-	uint8_t DT = 0;
-	uint8_t ST = 0;
 	bool exception;
+
+	uint16_t getPc() {
+		return pc;
+	}
 };
 
