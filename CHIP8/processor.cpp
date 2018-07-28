@@ -168,6 +168,7 @@ void processor::executeOperation()
 			display[R[((opCode & 0x00F0) >> 4)] + n] ^= tempSpriteRow;
 			// Currently does not wrap if printed on edge of screen
 		}
+		drawUpdate = true;
 		break;
 	case 0xE:
 		switch (opCode & 0x00FF) {
@@ -241,7 +242,6 @@ void processor::executeOperation()
 
 	if (exception) {
 		cout << errorText << endl;
-		system("pause");
 	}
 	else {
 		pc += 2;

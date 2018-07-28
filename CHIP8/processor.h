@@ -63,6 +63,7 @@ public:
 
 	array<uint64_t, 32> display;
 	bool exception;
+	bool drawUpdate;
 
 	uint16_t getPc() {
 		return pc;
