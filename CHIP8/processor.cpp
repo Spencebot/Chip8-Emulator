@@ -25,8 +25,8 @@ void processor::executeOperation()
 			display.fill(0);
 			break;
 		case 0x0EE: // Return - 00EE
-			pc = stack[sp] - 2;
-			if (sp > 0) {
+			pc = stack[sp];
+			if (sp >= 0) {
 				sp--;
 			}
 			else {
