@@ -15,7 +15,7 @@ processor::processor(vector<uint8_t> romFile) {
 void processor::executeOperation()
 {
 	uint16_t opCode = programToRun[pc - 0x200] * 256 + programToRun[pc - 0x1FF];
-	char userInputCheck;
+	SDL_Scancode userInputCheck;
 	char userChar = 'Z';
 	int result;
 	switch ((opCode & 0xF000) >> 12) {
@@ -23,6 +23,7 @@ void processor::executeOperation()
 		switch (opCode & 0x0FFF) {
 		case 0x0E0: // Clear dsiplay - 00E0
 			display.fill(0);
+			drawUpdate = true;
 			break;
 		case 0x0EE: // Return - 00EE
 			pc = stack[sp];
@@ -152,7 +153,7 @@ void processor::executeOperation()
 		break;
 	case 0xD: // Draw n bytes at positon Rx, Ry - Dxyn
 		R[0xF] = 0;
-		for (int n = 0; n < (opCode & 0x000F); n++) {
+		for (int n = 0; (n < (opCode & 0x000F)) && ((R[((opCode & 0x00F0) >> 4)] + n) < display.size()); n++) {
 			uint64_t tempSpriteRow;
 			if (I < 0) { // if it is a predefined sprite
 				tempSpriteRow = sprites[(-1 * I - 1) * 5 + n];
@@ -163,7 +164,7 @@ void processor::executeOperation()
 			// shift the row to column 0 and then down to location x
 			tempSpriteRow = tempSpriteRow << (64 - 8) >> R[((opCode & 0x0F00) >> 8)];
 			// Set RF if collision on this row
-			if ((display[R[((opCode & 0x00F0) >> 4)] + n] & tempSpriteRow) != 0) R[0xF] = 1;
+			if ((display[R[((opCode & 0x00F0) >> 4)] + n] & tempSpriteRow) != 0) { R[0xF] = 1; }
 			// display(row) XOR sprite
 			display[R[((opCode & 0x00F0) >> 4)] + n] ^= tempSpriteRow;
 			// Currently does not wrap if printed on edge of screen
@@ -173,14 +174,14 @@ void processor::executeOperation()
 	case 0xE:
 		switch (opCode & 0x00FF) {
 		case 0x9E: // Skip next if key = Rx is pressed - Ex9E
-			userInputCheck = convertNumberToLetter(R[(opCode & 0x0F00) >> 8]);
-			if (GetKeyState(userInputCheck) & 0x8000) {
+			userInputCheck = convertNumberToKey(R[(opCode & 0x0F00) >> 8]);
+			if (currentKeyStates[userInputCheck]) {
 				pc += 2;
 			}
 			break;
 		case 0xA1: // Skip next if key = Rx is not pressed - ExA1
-			userInputCheck = convertNumberToLetter(R[(opCode & 0x0F00) >> 8]);
-			if (!(GetKeyState(userInputCheck) & 0x8000)) {
+			userInputCheck = convertNumberToKey(R[(opCode & 0x0F00) >> 8]);
+			if (!currentKeyStates[userInputCheck]) {
 				pc += 2;
 			}
 			break;
@@ -195,7 +196,7 @@ void processor::executeOperation()
 		case 0x07: // Set Rx = Delay Timer
 			R[(opCode & 0x0F00) >> 8] = DT;
 			break;
-		case 0x0A: // Set Rx = next kchar userChar = 'Z';
+		case 0x0A: // Set Rx = next k
 			while (convertLetterToNumber(userChar) > 0xF) {
 				cout << "Input a Value (0x0-0xF) :";
 				userChar = getchar();
@@ -212,7 +213,7 @@ void processor::executeOperation()
 			I += R[(opCode & 0x0F00) >> 8];
 			break;
 		case 0x29: // Set I = location of sprite corresponding to value in Rx
-			I = -1 * R[(opCode & 0x0F00) >> 8];
+			I = -1 * (R[(opCode & 0x0F00) >> 8] + 1);
 			break;
 		case 0x33: // Set binary coded decimal value of Rx to memory locations of I, I+1, and I+2
 			if (I > 0x200) {
@@ -224,12 +225,12 @@ void processor::executeOperation()
 			break;
 		case 0x55: // Set memory, starting at location of I, to R0-Rx
 			for (int n = 0; n <= (opCode & 0x0F00) >> 8; n++) {
-				programToRun[(I - 0x200) + n] = R[(opCode & 0x0F00) >> 8];
+				programToRun[(I - 0x200) + n] = R[n];
 			}
 			break;
 		case 0x65: //Set R0-Rx to values starting at memory location of I
 			for (int n = 0; n <= (opCode & 0x0F00) >> 8; n++) {
-				R[(opCode & 0x0F00) >> 8] = programToRun[(I - 0x200) + n];
+				R[n] = programToRun[(I - 0x200) + n];
 			}
 			break;
 		default: // invalid command
@@ -255,55 +256,55 @@ processor::~processor()
 {
 }
 
-char processor::convertNumberToLetter(uint8_t value) {
-	char letter;
+SDL_Scancode processor::convertNumberToKey(uint8_t value) {
+	SDL_Scancode key;
 	switch (value) {
-	case 0x0: letter = '0';
-	case 0x1: letter = '1';
-	case 0x2: letter = '2';
-	case 0x3: letter = '3';
-	case 0x4: letter = '4';
-	case 0x5: letter = '5';
-	case 0x6: letter = '6';
-	case 0x7: letter = '7';
-	case 0x8: letter = '8';
-	case 0x9: letter = '9';
-	case 0xA: letter = 'A';
-	case 0xB: letter = 'B';
-	case 0xC: letter = 'C';
-	case 0xD: letter = 'D';
-	case 0xE: letter = 'E';
-	case 0xF: letter = 'F';	
+	case 0x0: key = SDL_SCANCODE_0; break;
+	case 0x1: key = SDL_SCANCODE_1; break;
+	case 0x2: key = SDL_SCANCODE_2; break;
+	case 0x3: key = SDL_SCANCODE_3; break;
+	case 0x4: key = SDL_SCANCODE_4; break;
+	case 0x5: key = SDL_SCANCODE_5; break;
+	case 0x6: key = SDL_SCANCODE_6; break;
+	case 0x7: key = SDL_SCANCODE_7; break;
+	case 0x8: key = SDL_SCANCODE_8; break;
+	case 0x9: key = SDL_SCANCODE_9; break;
+	case 0xA: key = SDL_SCANCODE_A; break;
+	case 0xB: key = SDL_SCANCODE_B; break;
+	case 0xC: key = SDL_SCANCODE_C; break;
+	case 0xD: key = SDL_SCANCODE_D; break;
+	case 0xE: key = SDL_SCANCODE_E; break;
+	case 0xF: key = SDL_SCANCODE_F; break;
 	}
-	return letter;
+	return key;
 }
 
 uint8_t processor::convertLetterToNumber(char letter) {
 	uint8_t value;
 	switch (letter) {
-	case '0': value = 0x0;
-	case '1': value = 0x1;
-	case '2': value = 0x2;
-	case '3': value = 0x3;
-	case '4': value = 0x4;
-	case '5': value = 0x5;
-	case '6': value = 0x6;
-	case '7': value = 0x7;
-	case '8': value = 0x8;
-	case '9': value = 0x9;
-	case 'A': value = 0xA;
-	case 'B': value = 0xB;
-	case 'C': value = 0xC;
-	case 'D': value = 0xD;
-	case 'E': value = 0xE;
-	case 'F': value = 0xF;
-	case 'a': value = 0xA;
-	case 'b': value = 0xB;
-	case 'c': value = 0xC;
-	case 'd': value = 0xD;
-	case 'e': value = 0xE;
-	case 'f': value = 0xF;
-	default: value = 0xFF;
+	case '0': value = 0x0; break;
+	case '1': value = 0x1; break;
+	case '2': value = 0x2; break;
+	case '3': value = 0x3; break;
+	case '4': value = 0x4; break;
+	case '5': value = 0x5; break;
+	case '6': value = 0x6; break;
+	case '7': value = 0x7; break;
+	case '8': value = 0x8; break;
+	case '9': value = 0x9; break;
+	case 'A': value = 0xA; break;
+	case 'B': value = 0xB; break;
+	case 'C': value = 0xC; break;
+	case 'D': value = 0xD; break;
+	case 'E': value = 0xE; break;
+	case 'F': value = 0xF; break;
+	case 'a': value = 0xA; break;
+	case 'b': value = 0xB; break;
+	case 'c': value = 0xC; break;
+	case 'd': value = 0xD; break;
+	case 'e': value = 0xE; break;
+	case 'f': value = 0xF; break;
+	default: value = 0xFF; break;
 	}
 	return value;
 }

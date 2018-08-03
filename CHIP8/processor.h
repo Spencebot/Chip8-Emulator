@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <array>
+#include <SDL.h>
 using namespace std;
 
 class processor
@@ -51,7 +52,7 @@ private:
 		0xF0, 0x80, 0xF0, 0x80, 0x80	
 	};
 
-	char convertNumberToLetter(uint8_t value);
+	SDL_Scancode convertNumberToKey(uint8_t value);
 	uint8_t convertLetterToNumber(char letter);
 
 public:
@@ -64,6 +65,7 @@ public:
 	array<uint64_t, 32> display;
 	bool exception;
 	bool drawUpdate;
+	const uint8_t* currentKeyStates;
 
 	uint16_t getPc() {
 		return pc;
