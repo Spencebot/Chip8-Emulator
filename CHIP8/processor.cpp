@@ -18,6 +18,7 @@ void processor::executeOperation()
 	SDL_Scancode userInputCheck;
 	char userChar = 'Z';
 	int result;
+	srand(time(NULL));
 	switch ((opCode & 0xF000) >> 12) {
 	case 0x0:
 		switch (opCode & 0x0FFF) {
