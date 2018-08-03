@@ -1,3 +1,2 @@
-﻿  processor.cpp
-c:\users\spenc\source\repos\chip8-emulator2\chip8\processor.cpp(156): warning C4018: '<': signed/unsigned mismatch
+﻿  CHIP8.cpp
   CHIP8.vcxproj -> C:\Users\spenc\source\repos\Chip8-Emulator2\Debug\CHIP8.exe
