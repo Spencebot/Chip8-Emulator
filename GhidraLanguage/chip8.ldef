@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<language_definitions>
+  <language processor="CHIP8"
+            endian="big"
+            size="12"
+            variant="default"
+            version="1.5"
+            slafile="chip8.sla"
+            processorspec="chip8.pspec"
+            manualindexfile="../manuals/chip8.idx"
+            id="CHIP8:BE:8:default">
+    <description>CHIP8 12-bit addresses, big endian</description>
+    <compiler name="default" spec="chip8.cspec" id="default"/>
+    <external_name tool="gnu" name="chip8:4000"/>
+    <external_name tool="DWARF.register.mapping.file" name="chip8.dwarf"/>
+  </language>
+</language_definitions>

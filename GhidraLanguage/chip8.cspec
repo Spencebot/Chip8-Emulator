@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<compiler_spec>
+  <data_organization>
+        <pointer_size value="2"/>
+  </data_organization>
+
+  <stackpointer register="sp" space="ram"/>
+  <funcptr align="2"/>
+  <spacebase name="gp" register="gp" space="ram"/>
+  <global>
+    <range space="gp"/>
+    <range space="ram"/>
+    <range space="register" first="0x200" last="0xfff"/>
+  </global>
+  <default_proto>
+    <prototype name="__stdcall" extrapop="0" stackshift="0">
+      <input>
+        <pentry minsize="1" maxsize="4">
+          <register name="V0"/>
+        </pentry>
+        <pentry minsize="1" maxsize="4">
+          <register name="V1"/>
+        </pentry>
+        <pentry minsize="1" maxsize="4">
+          <register name="V2"/>
+        </pentry>
+        <pentry minsize="1" maxsize="4">
+          <register name="V3"/>
+        </pentry>
+      </input>
+      <output>
+        <pentry minsize="1" maxsize="4">
+          <register name="V0"/>
+        </pentry>
+      </output>
+    </prototype>
+  </default_proto>
+    
+</compiler_spec>

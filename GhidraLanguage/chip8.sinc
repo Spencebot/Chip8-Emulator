@@ -1,0 +1,39 @@
+#-----
+@define REGSIZE "1"     # General purpose register size (1 byte)
+@define ADDRSIZE "2"    # Memory address size (16 bits, only 12 used)
+#-----
+
+define endian=$(ENDIAN);
+
+define alignment=2;
+
+define space ram type=ram_space size=$(ADDRSIZE) default;
+define space register type=register_space size=1;
+
+# General purpose registers
+define register offset=0 size=$(REGSIZE) [ 
+    V0 V1 V2 V3 
+    V4 V5 V6 V7 
+    V8 V9 VA VB 
+    VC VD VE VF 
+    sp DT ST
+];
+
+# Address registers
+define register offset=0 size=$(ADDRSIZE) [ 
+    I PC 
+];
+
+# Instruction fields
+define token instr(16)
+    opcode      = (12,15)
+    addr        = (0, 11)
+    Vx          = (8, 11)
+    Vy          = (4, 7)
+    byte        = (0, 7)
+;
+
+attach variables [ Vx Vy ] [ 
+    V0 V1 V2 V3 V4 V5 V6 V7
+    V8 V9 VA VB VC VD VE VF 
+];

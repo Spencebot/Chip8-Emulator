@@ -1,0 +1,5 @@
+# SLA specification file for CHIP8 big endian
+
+@include "chip8.sinc"
+@include "chip8Instruction.sinc"
+

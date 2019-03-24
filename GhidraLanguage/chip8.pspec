@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<processor_spec>
+  <properties>
+    <property key="assemblyRating:CHIP8:BE:8:default" value="BRONZE"/>
+  </properties>
+  <programcounter register="pc"/>
+  <context_data>
+    <context_set space="ram">
+    </context_set>
+  </context_data>
+  <register_data>
+  </register_data>
+</processor_spec>

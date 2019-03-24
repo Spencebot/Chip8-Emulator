@@ -1,0 +1,15 @@
+<dwarf>
+	<register_mappings>
+		<register_mapping dwarf="0" ghidra="V0" auto_count="10"/> <!-- V0..V9 -->
+		<register_mapping dwarf="10" ghidra="VA"/>
+		<register_mapping dwarf="11" ghidra="VB"/>
+		<register_mapping dwarf="12" ghidra="VC"/>
+		<register_mapping dwarf="13" ghidra="VD"/>
+		<register_mapping dwarf="14" ghidra="VE"/>
+		<register_mapping dwarf="15" ghidra="VF"/>
+		<register_mapping dwarf="16" ghidra="I"/>
+		<register_mapping dwarf="17" ghidra="sp" stackpointer="true"/>
+		<register_mapping dwarf="18" ghidra="pc" programcounter="true"/>
+	</register_mappings>
+	<call_frame_cfa value="0"/>
+</dwarf>
